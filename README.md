@@ -1,2 +1,2 @@
 # 3map
-Zoomable treemap
+Javascript library to implement a interactive zoomable treemap.
