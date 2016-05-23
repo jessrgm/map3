@@ -1,0 +1,58 @@
+$dncp_active_color:#ff8200;
+$gray_color:#ddd;
+//$text_color:#959595;
+$text_color:#7a7a7a;
+$dncp_black_active:#002532;
+body {
+    overflow: hidden;
+}
+.map3 {
+    margin-top: 25px;
+    margin-bottom: 25px;
+    width: 100%;
+    height: 450px;
+    margin-left: auto;
+    margin-right: auto;
+    path {
+        stroke: white;
+        stroke-width: 2px;
+        cursor: pointer;
+    }
+    path.no-border {
+        stroke: white;
+        stroke-width: 0px;
+    }
+}
+g.d3plus_rect {
+    rect {
+        stroke-width: 3px !important;
+        stroke: rgb(255, 255, 255) !important;
+    }
+    rect[data-border='0'] {
+        stroke-width: 0px !important;
+    }
+    rect[data-border='1'] {
+        stroke-width: 1px !important;
+    }
+    rect[data-border='2'] {
+        stroke-width: 2px !important;
+    }
+}
+text {
+    font-family: 'neristhin'!important;
+}
+div#d3plus_tooltip_curtain_tree_map,
+#d3plus_tooltip_id_tree_map.d3plus_tooltip.d3plus_tooltip_large {
+    display: none !important;
+}
+g#container path {
+    //stroke: #fff;
+}
+#explanation {
+    position: absolute;
+    width: 100%;
+    text-align: center;
+    color: #666;
+    z-index: -1;
+    padding-right: 15px;
+}
