@@ -1,4 +1,4 @@
-# 3map
+# Map3
 Javascript library to implement a interactive zoomable treemap.
 
 
