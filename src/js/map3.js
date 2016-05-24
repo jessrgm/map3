@@ -6,10 +6,13 @@
  * @config {string|array} label the json attribute name that determines the label of the box.
  * @config {string} size the json attribute name that determines the size of the box.
  * @config {string}[time] the json attribute name that determines the timeline of the view.
+ * @config {array}[levels] 
+ * @config {number}[zoomTime] 
  */
 var Map3 = function (options) {
     this.initialize(options);
     this.build();
+    this.breadcrumbs();
 }
 
 /**
@@ -18,69 +21,114 @@ var Map3 = function (options) {
  * @config {string} container target container.
  * @config {string|array} label the json attribute name that determines the label of the box.
  * @config {string} size the json attribute name that determines the size of the box.
+ * @config {array}[levels] 
+ * @config {number}[zoomTime]
  */
 Map3.prototype.initialize = function (options) {
+    this.zoomTime = 250;
     for (var attr in options) {
         this[attr] = options[attr];
     }
+    this.events = {};
+    this.cargs = {};
+    this.level = 0;
     this.label = typeof this.label == "string" ? [this.label] : this.label;
-    this.treemap = d3plus.viz();
+    this.levels = typeof this.levels == "undefined" ? [] : this.levels;
+    //se prepara el container de la visualización
+    this.scope = "map3-" + (new Date()).getTime();
+    var $container = $("<div></div>");
+    $container.attr("id", this.scope);
+    this.scope = "#" + this.scope;
+    $(this.container).append($container);
+    //se inicializa el view
 }
 
 /**
  * This method build the base of the treemap.
  */
 Map3.prototype.build = function () {
+    this.treemap = d3plus.viz();
     var thiz = this;
-
-    this.config({
-        container: this.container,
+    /*
+     * base configuration of the visualization.
+     */
+    this.treemap.config({
+        container: this.scope,
         type: "tree_map",
         id: this.label,
         labels: {
             "align": "center",
             "valign": "top"
         },
-
         size: {
             value: thiz.size,
             threshold: false
-        },
-
-        color: {
-            scale: thiz.color()
-        },
-        zoom: true,
-        tooltip: {
-            "html": function (e) {
-                return "";
-            }
-        },
-        mouse: {
-            "move": true,
-            "click": function (d, viz) {
-                thiz.zoom(d);
-            }
-        },
-        format: {
-            text: function (text, params) {
-                if (typeof params !== "undefined" && typeof params.data !== "undefined" && params.key == thiz.label) {
-                    //se invoca al método que formatea los labels
-                    return thiz.textFormat(params.data);
-                }
-                return d3plus.string.title(text, params);
-            },
-            number: function (number, params) {
-                if (typeof params !== "undefined" && typeof params.data !== "undefined" && params.key == thiz.size) {
-                    return thiz.sizeFormat(params.data);
-                }
-                return d3plus.number.format(number, params);
-            }
         }
     });
+
+    /*
+     * Bind the data formatter
+     */
+    this.treemap.tooltip({
+        "html": function (e) {
+            return "";
+        }
+    });
+
+    /*
+     * Bind the data formatter
+     */
+    this.treemap.format({
+
+        text: function (text, params) {
+            if (typeof params !== "undefined" && typeof params.data !== "undefined" && params.key == thiz.label) {
+                //se invoca al método que formatea los labels
+                return thiz.textFormat(params.data);
+            }
+            return d3plus.string.title(text, params);
+        },
+        number: function (number, params) {
+            if (typeof params !== "undefined" && typeof params.data !== "undefined" && params.key == thiz.size) {
+                return thiz.sizeFormat(params.data);
+            }
+            return d3plus.number.format(number, params);
+        }
+
+    });
+
+    /*
+     * bind click event to the treemap
+     */
+    this.treemap.mouse({
+        "move": true,
+        "click": function (d, viz) {
+            thiz.beforeClick(d, viz);
+        }
+    });
+    this.treemap.time(thiz.time);
 }
 
+Map3.prototype.on = function (event, handler) {
+    this.events[event] = handler;
+}
 
+Map3.prototype.trigger = function (event, data) {
+    if (typeof this.events[event] !== "undefined") {
+        this.events[event](data);
+    }
+}
+
+/**
+ *
+ */
+Map3.prototype.beforeClick = function (d, viz) {
+    if (this.level < this.levels.length - 1 && this.levels.length != 0) {
+        this.zoom(d);
+        this.updateBreadcrumbs(d);
+        this.level += 1;
+        this.trigger("click", d);
+    }
+}
 
 /**
  * Wrapper method
@@ -88,11 +136,12 @@ Map3.prototype.build = function () {
 Map3.prototype.config = function (options) {
     for (var key in options) {
         this.treemap[key](options[key]);
+        this.cargs[key] = options[key];
     }
 }
 
 /**
- *
+ * Simple text formatter.
  */
 Map3.prototype.textFormat = function (data) {
     var text = data[this.label];
@@ -100,11 +149,18 @@ Map3.prototype.textFormat = function (data) {
 }
 
 /**
- *
+ * Simple number formater.
  */
 Map3.prototype.sizeFormat = function (data) {
     var n = data[this.size];
     return n;
+}
+
+Map3.prototype.redraw = function (data) {
+    $(this.scope).html("");
+    this.build();
+    this.data(data);
+    this.config(this.cargs);
 }
 
 /**
@@ -113,33 +169,6 @@ Map3.prototype.sizeFormat = function (data) {
 Map3.prototype.data = function (data) {
     this.treemap.data(data);
     this.treemap.draw();
-
-}
-
-/**
- *
- */
-Map3.prototype.color = function () {
-    return [
-        "#fdae6b",
-        "#EACE3F",
-        "#cba47d",
-        "#f88710",
-        "#d2ffb7",
-        "#a1d99b",
-        "#7197a0",
-        "#fdd0a2",
-        "#bcbddc",
-        "#e89c89",
-        "#5b7781",
-        "#afd5e8",
-        "#f7ba77",
-        "#aeb8bc",
-        "#d1d392",
-        "#c6dbef",
-        "#e099cf",
-        "#889ca3"
-    ];
 }
 
 /**
@@ -148,7 +177,6 @@ Map3.prototype.color = function () {
  *
  * @public
  * @name views.TreemapView#animate
- 
  */
 Map3.prototype.animate = function ($el, attrs, speed, callback) {
     // duration in ms
@@ -206,7 +234,6 @@ Map3.prototype.animate = function ($el, attrs, speed, callback) {
             $el.attr(k, function (i, old) {
                 var result = +getNumber(old) + pst;
                 return result + sufix; // add value do the old one
-
             });
         });
 
@@ -218,8 +245,12 @@ Map3.prototype.animate = function ($el, attrs, speed, callback) {
                 callback($el, attrs);
             }
         }
-
     })(); // start the loop
+}
+
+
+Map3.prototype.getEl = function (data) {
+    return $('[transform*="translate(' + data.d3plus.x + ',' + data.d3plus.y + ')"]');
 }
 
 /**
@@ -232,14 +263,14 @@ Map3.prototype.animate = function ($el, attrs, speed, callback) {
 Map3.prototype.zoom = function (data) {
     // se obtiene la referencia al elemento seleccionado. D3plus utiliza transform para transladar
     // las coordenadas del svg, se busca por el elemento que coincida con el translate del g 
-    var $g = $('[transform*="translate(' + data.d3plus.x + ',' + data.d3plus.y + ')"]');
+    var $g = this.getEl(data);
     //se obtiene el tamaño del contenedor para calcular el tamaño de la tipografía.
-    var w = $(this.container).css("width").replace("px", "");
-    var h = $(this.container).css("height").replace("px", "");
+    var w = $(this.scope).css("width").replace("px", "");
+    var h = $(this.scope).css("height").replace("px", "");
     w = parseFloat(w) + 50;
     h = parseFloat(h) + 50;
     var half = w / 2;
-    var time = 250;
+    var time = this.zoomTime;
     //se obtienen las referencias
     var $target = $g.clone();
     //se elimina el texto del share
@@ -253,8 +284,7 @@ Map3.prototype.zoom = function (data) {
     var textValue = this.textFormat(data);
     if ($text.length == 0) {
         var $rect = $target.find(".d3plus_data");
-        textColor = d3plus.color.lighter($rect.attr("fill"), -0.6);
-        //textColor = d3plus.color.lighter(textColor, 0.1);
+        textColor = d3plus.color.text($rect.attr("fill"));
         $text = d3.select($target[0])
             .append("text")
             .attr("font-size", "40px")
@@ -267,13 +297,16 @@ Map3.prototype.zoom = function (data) {
             .attr("dy", "44px")
             .attr("dominant-baseline", "alphabetic")
             .text(textValue);
-
+        //se obtiene la referencia al texto
         $text = $rect.find("text");
 
     } else if ($text.length == 1) {
         var $tspan = $target.find("tspan");
-        $tspan.text(textValue);
+        for (var i = 1; i < $tspan.length; i++) {
+            $($tspan[i]).remove();
+        }
 
+        $tspan.text(textValue);
     }
     //se obtienen los tspan y el rect del item del treemap
     var $rect = $target.find("rect");
@@ -330,4 +363,48 @@ Map3.prototype.zoom = function (data) {
     //se setea el id del elemento manipulado
     $target.attr("id", "tmp-zoom-g");
     $("#d3plus_viz").append($target);
+}
+
+
+/**
+ * buil a breadcrumbs
+ */
+Map3.prototype.breadcrumbs = function () {
+    var $ul = $("<ul class='map3-breadcrumbs'/>");
+    var $liTmpl = $("<li / >");
+    var $aTmpl = $("<a class='map3-levels inactive'/>");
+    for (var i = 0; i < this.levels.length; i++) {
+        var $li = $liTmpl.clone();
+        var $a = $aTmpl.clone();
+        $a.attr("data-level", i);
+        $a.attr("data-name", this.levels[i]);
+        $a.text(this.levels[i]);
+        $li.append($a);
+        $ul.append($li);
+    }
+    // leyenda del breadcrumbs
+    var $ol = $("<ol class='breadcrumb' />");
+    //se añade los elementos
+    $(this.container).prepend($ol);
+    $(this.container).prepend($ul);
+}
+
+Map3.prototype.updateBreadcrumbs = function (data) {
+    var $target = this.getEl(data);
+    var fill = $target.find("rect").attr("fill");
+    var textColor = d3plus.color.text(fill);
+    $brumbs = $(this.container).find(".map3-breadcrumbs");
+    $a = $brumbs.find("[data-level='" + this.level + "']");
+    $a.removeClass("inactive");
+
+    $labels = $(this.container).find(".breadcrumb");
+    var $li = $("<li/ >");
+    var $span = $("<span class='text'/>");
+    var $div = $("<div class='note'/>");
+    $span.text(this.textFormat(data));
+    $div.text(this.sizeFormat(data));
+    $li.append($span);
+    $li.append($("<br/>"));
+    $li.append($div);
+    $labels.append($li);
 }
