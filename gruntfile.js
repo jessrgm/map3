@@ -19,24 +19,9 @@ module.exports = function (grunt) {
         copy: {
             main: {
                 files: [{
-                        cwd: 'src/vendors/bootstrap-sass/assets/fonts',
+                        cwd: './test',
                         src: '**/*',
-                        dest: 'dist/fonts',
-                        expand: true
-                    }, {
-                        cwd: 'src/vendors/fontawesome/fonts',
-                        src: '**/*',
-                        dest: 'dist/fonts',
-                        expand: true
-                    }, {
-                        cwd: 'src/images',
-                        src: '**/*',
-                        dest: 'dist/images',
-                        expand: true
-                    }, {
-                        cwd: 'src/',
-                        src: '*.html',
-                        dest: 'dist/',
+                        dest: 'dist/test',
                         expand: true
                     }
                 ]
@@ -56,7 +41,7 @@ module.exports = function (grunt) {
 
         open: {
             all: {
-                path: 'http://localhost:8888'
+                path: 'http://localhost:8888/test'
             }
         },
 
@@ -70,11 +55,9 @@ module.exports = function (grunt) {
                 'src/vendors/jquery/dist/jquery.min.js',
                 'src/vendors/d3/d3.min.js',
                 'src/vendors/d3plus/d3plus.min.js',
-                'src/js/data.js',
-                'src/js/map3.js',
-                'src/js/app.js',
+                'src/js/map3.js'
                 ],
-                dest: 'dist/js/app.min.js'
+                dest: 'dist/js/map3.full.js'
             }
         },
 
@@ -84,13 +67,9 @@ module.exports = function (grunt) {
                 sourceMap: false
             },
             build: {
-                files: [{
-                    expand: true,
-                    src: '*.js',
-                    dest: 'dist',
-                    ext: '.js',
-                    extDot: 'last'
-                }]
+                files: {
+                    'dist/js/map3.min.js': ['src/js/map3.js']
+                }
             }
         },
 
@@ -106,6 +85,6 @@ module.exports = function (grunt) {
     });
 
     // Default task.
-    grunt.registerTask('default', ['concat', 'copy', 'sass']);
-    grunt.registerTask('serve', ['default', "open", 'connect:server', 'watch']);
+    grunt.registerTask('default', ['uglify', 'concat', 'sass']);
+    grunt.registerTask('serve', ['default', 'copy', "open", 'connect:server', 'watch']);
 };

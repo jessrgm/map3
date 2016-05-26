@@ -1,4 +1,4 @@
 src/vendors/*
-dist/*
+dist/test/*
 node_modules/*
 .sass-cache/*
