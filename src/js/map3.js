@@ -434,10 +434,10 @@ Map3.prototype.updateBreadcrumbs = function (data) {
     aStyle += "a#{id}::before {border-color: {fill} {fill} {fill} transparent;}";
     aStyle += "li:last-child a#{id}::after {border-color: {fill} {fill} {fill} {fill};}";
     aStyle += "li a#{id}::after {border-left: 1em solid {fill};}";
-    aStyle += "a#{id}{background-color: {fill};}";
+    aStyle += "a#{id}{background-color: {fill}; color:{text}}";
     aStyle += "li:first-child a#{id}::before{border-color: {fill} {fill} {fill} {fill};}";
     aStyle += "</style>";
-    aStyle = aStyle.replace(/{id}/g, aId).replace(/{fill}/g, fill);
+    aStyle = aStyle.replace(/{id}/g, aId).replace(/{fill}/g, fill).replace(/{color}/g, textColor);
     $a.append($(aStyle));
 
     var $labels = $(this.container).find(".breadcrumb");

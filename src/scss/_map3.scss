@@ -83,6 +83,9 @@ ul.map3-breadcrumbs {
         a:hover {
             color: $text_color;
         }
+        a:not(.disable):hover {
+            opacity: 0.7;
+        }
         a::before {
             content: "";
             position: absolute;
