@@ -11,6 +11,7 @@
  */
 var Map3 = function (options) {
     this.initialize(options);
+    this.dataMap = {};
     this.build();
     this.breadcrumbs();
 }
@@ -125,8 +126,9 @@ Map3.prototype.beforeClick = function (d, viz) {
     if (this.level < this.levels.length - 1 && this.levels.length != 0) {
         this.zoom(d);
         this.updateBreadcrumbs(d);
+        this.dataMap[this.level] = d;
         this.level += 1;
-        this.trigger("click", d);
+        this.trigger("drill-down", d);
     }
 }
 
@@ -372,11 +374,13 @@ Map3.prototype.zoom = function (data) {
 Map3.prototype.breadcrumbs = function () {
     var $ul = $("<ul class='map3-breadcrumbs'/>");
     var $liTmpl = $("<li / >");
-    var $aTmpl = $("<a class='map3-levels inactive'/>");
+    var $aTmpl = $("<a class='map3-levels disable'/>");
     for (var i = 0; i < this.levels.length; i++) {
         var $li = $liTmpl.clone();
+        var aId = "map3-li-lvl-" + i;
         var $a = $aTmpl.clone();
         $a.attr("data-level", i);
+        $a.attr("id", aId);
         $a.attr("data-name", this.levels[i]);
         $a.text(this.levels[i]);
         $li.append($a);
@@ -387,18 +391,58 @@ Map3.prototype.breadcrumbs = function () {
     //se añade los elementos
     $(this.container).prepend($ol);
     $(this.container).prepend($ul);
+
+    var thiz = this;
+    $ul.find("li").on("click", function () {
+        if (!$(this).find("a").hasClass("disable")) {
+            thiz.onDrillUp($(this));
+        }
+    });
 }
+
+Map3.prototype.onDrillUp = function ($li) {
+    var $a = $li.find("a");
+    var level = $a.attr("data-level");
+    this.level = parseInt(level);
+    var $labels = $(this.container).find(".breadcrumb");
+    var $brumbs = $(this.container).find(".map3-breadcrumbs");
+    var len = $brumbs.find("[data-level]").length;
+    for (var i = level; i < len; i++) {
+        $labels.find("[data-level='" + i + "']").remove();
+        var $aEl = $brumbs.find("[data-level='" + i + "']");
+        var aId = $aEl.attr("id");
+        $aEl.addClass("disable");
+        $("." + aId).remove();
+    }
+    var data = {};
+    data.level = level;
+    data.data = level == 0 ? null : this.dataMap[this.level - 1];
+    this.trigger("drill-up", data);
+}
+
 
 Map3.prototype.updateBreadcrumbs = function (data) {
     var $target = this.getEl(data);
     var fill = $target.find("rect").attr("fill");
     var textColor = d3plus.color.text(fill);
-    $brumbs = $(this.container).find(".map3-breadcrumbs");
-    $a = $brumbs.find("[data-level='" + this.level + "']");
-    $a.removeClass("inactive");
+    var $brumbs = $(this.container).find(".map3-breadcrumbs");
+    var $a = $brumbs.find("[data-level='" + this.level + "']");
+    var aId = $a.attr("id");
+    $a.removeClass("disable");
+    //se aplican los estilos al breadcrums
+    var aStyle = "<style class='{id}'>";
+    aStyle += "a#{id}::before {border-color: {fill} {fill} {fill} transparent;}";
+    aStyle += "li:last-child a#{id}::after {border-color: {fill} {fill} {fill} {fill};}";
+    aStyle += "li a#{id}::after {border-left: 1em solid {fill};}";
+    aStyle += "a#{id}{background-color: {fill};}";
+    aStyle += "li:first-child a#{id}::before{border-color: {fill} {fill} {fill} {fill};}";
+    aStyle += "</style>";
+    aStyle = aStyle.replace(/{id}/g, aId).replace(/{fill}/g, fill);
+    $a.append($(aStyle));
 
-    $labels = $(this.container).find(".breadcrumb");
+    var $labels = $(this.container).find(".breadcrumb");
     var $li = $("<li/ >");
+    $li.attr("data-level", this.level);
     var $span = $("<span class='text'/>");
     var $div = $("<div class='note'/>");
     $span.text(this.textFormat(data));

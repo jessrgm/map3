@@ -116,7 +116,7 @@ ul.map3-breadcrumbs {
     .current::before {
         content: normal;
     }
-    li a.inactive {
+    li a.disable {
         cursor: not-allowed;
     }
     /*Primer elemento del breadcrums*/
