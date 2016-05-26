@@ -68,7 +68,6 @@ module.exports = function (grunt) {
             libs: {
                 src: [
                 'src/vendors/jquery/dist/jquery.min.js',
-                'src/vendors/jquery.svg/jquery.svg.min.js',
                 'src/vendors/d3/d3.min.js',
                 'src/vendors/d3plus/d3plus.min.js',
                 'src/js/data.js',

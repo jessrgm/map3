@@ -11,6 +11,7 @@
  */
 var Map3 = function (options) {
     this.initialize(options);
+    this.timeArray = [];
     this.dataMap = {};
     this.build();
     this.breadcrumbs();
@@ -106,13 +107,23 @@ Map3.prototype.build = function () {
             thiz.beforeClick(d, viz);
         }
     });
-    this.treemap.time(thiz.time);
+
+    if (typeof thiz.time !== "undefined") {
+        this.time.solo = typeof this.time.solo == "undefined" ? [] : this.time.solo;
+        this.treemap.time(this.time);
+    }
 }
 
+/**
+ *
+ */
 Map3.prototype.on = function (event, handler) {
     this.events[event] = handler;
 }
 
+/**
+ *
+ */
 Map3.prototype.trigger = function (event, data) {
     if (typeof this.events[event] !== "undefined") {
         this.events[event](data);
@@ -128,6 +139,9 @@ Map3.prototype.beforeClick = function (d, viz) {
         this.updateBreadcrumbs(d);
         this.dataMap[this.level] = d;
         this.level += 1;
+        if (typeof this.time != "undefined") {
+            this.time.solo = d[this.time.value];
+        }
         this.trigger("drill-down", d);
     }
 }
@@ -171,6 +185,7 @@ Map3.prototype.redraw = function (data) {
 Map3.prototype.data = function (data) {
     this.treemap.data(data);
     this.treemap.draw();
+    var total = this.treemap.total();
 }
 
 /**
@@ -400,6 +415,9 @@ Map3.prototype.breadcrumbs = function () {
     });
 }
 
+/**
+ *
+ */
 Map3.prototype.onDrillUp = function ($li) {
     var $a = $li.find("a");
     var level = $a.attr("data-level");
@@ -414,13 +432,19 @@ Map3.prototype.onDrillUp = function ($li) {
         $aEl.addClass("disable");
         $("." + aId).remove();
     }
-    var data = {};
+    var d = level == 0 ? null : this.dataMap[this.level - 1];
+    var data = $.extend({}, d);
     data.level = level;
-    data.data = level == 0 ? null : this.dataMap[this.level - 1];
+    if (typeof this.time != "undefined" && data.data != null) {
+        data.data[this.time.value] = this.time.solo;
+    }
+
     this.trigger("drill-up", data);
 }
 
-
+/**
+ *
+ */
 Map3.prototype.updateBreadcrumbs = function (data) {
     var $target = this.getEl(data);
     var fill = $target.find("rect").attr("fill");
@@ -448,7 +472,8 @@ Map3.prototype.updateBreadcrumbs = function (data) {
     $span.text(this.textFormat(data));
     $div.text(this.sizeFormat(data));
     $li.append($span);
-    $li.append($("<br/>"));
-    $li.append($div);
+    //TODO se desabilita los totales ya que falta implementar el filtrado por año.
+    //$li.append($("<br/>"));
+    //$li.append($div);
     $labels.append($li);
 }
