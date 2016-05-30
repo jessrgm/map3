@@ -78,8 +78,15 @@ module.exports = function (grunt) {
                 options: {
                     livereload: true
                 },
-                files: ['src/**/*'],
+                files: ['src/**/*', 'test/**/*'],
                 tasks: ['default']
+            },
+            test: {
+                options: {
+                    livereload: true
+                },
+                files: ['test/**/*'],
+                tasks: ['default', 'copy']
             }
         },
     });
