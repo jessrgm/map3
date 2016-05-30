@@ -1,11 +1,6 @@
-$dncp_active_color:#ff8200;
 $gray_color:#ddd;
 //$text_color:#959595;
 $text_color:#7a7a7a;
-$dncp_black_active:#002532;
-body {
-    overflow: hidden;
-}
 .map3 {
     margin-top: 25px;
     margin-bottom: 25px;
@@ -59,7 +54,7 @@ g#container path {
 
 /* breadcrums*/
 
-ul.map3-breadcrumbs {
+ul.map3-hierarchies {
     margin: 0;
     padding: 0;
     list-style: none;
@@ -132,21 +127,21 @@ ul.map3-breadcrumbs {
     }
 }
 @media only screen and (min-width: 220px) and (max-width: 540px) {
-    .map3-breadcrumbs {
+    .map3-hierarchies {
         height: auto !important;
     }
-    .map3-breadcrumbs li,
-    .map3-breadcrumbs li a {
+    .map3-hierarchies li,
+    .map3-hierarchies li a {
         width: 95%;
     }
-    .map3-breadcrumbs li a {
+    .map3-hierarchies li a {
         margin-top: 1px;
     }
-    .map3-breadcrumbs li a::before {
+    .map3-hierarchies li a::before {
         border-color: $gray_color $gray_color $gray_color $gray_color;
         height: 40px;
     }
-    .map3-breadcrumbs li:last-child a::after {
+    .map3-hierarchies li:last-child a::after {
         border-color: transparent transparent transparent $gray_color;
     }
 }
@@ -156,7 +151,7 @@ ul.map3-breadcrumbs {
     font-style: italic;
     font-weight: bold;
 }
-.breadcrumb {
+.map3-breadcrumbs {
     margin-left: 0px;
     padding: 0px;
     margin-bottom: 0px;
@@ -171,16 +166,11 @@ ul.map3-breadcrumbs {
         font-weight: bold;
     }
 }
-.breadcrumb > li {
+.map3-breadcrumbs > li {
     display: inline-block;
 }
-.breadcrumb > li + li:before {
+.map3-breadcrumbs > li + li:before {
     content: "/\00a0";
     padding: 0 5px;
     color: $text_color;
-}
-.breadcrumb {
-    .icon {
-        background-image: url("data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/PjxzdmcgaGVpZ2h0PSI0OCIgdmlld0JveD0iMCAwIDQ4IDQ4IiB3aWR0aD0iNDgiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTM0IDZoLTIwYy0yLjIxIDAtMy45OCAxLjc5LTMuOTggNGwtLjAyIDMyIDE0LTYgMTQgNnYtMzJjMC0yLjIxLTEuNzktNC00LTR6Ii8+PHBhdGggZD0iTTAgMGg0OHY0OGgtNDh6IiBmaWxsPSJub25lIi8+PC9zdmc+");
-    }
 }

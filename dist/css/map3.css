@@ -1,7 +1,3 @@
-body {
-  overflow: hidden;
-}
-
 .map3 {
   margin-top: 25px;
   margin-bottom: 25px;
@@ -53,7 +49,7 @@ div#d3plus_tooltip_curtain_tree_map,
 }
 
 /* breadcrums*/
-ul.map3-breadcrumbs {
+ul.map3-hierarchies {
   margin: 0;
   padding: 0;
   list-style: none;
@@ -62,11 +58,11 @@ ul.map3-breadcrumbs {
   display: inline-block;
   /*Primer elemento del breadcrums*/
 }
-ul.map3-breadcrumbs li {
+ul.map3-hierarchies li {
   float: left;
   margin: 0 .5em 0 1em;
 }
-ul.map3-breadcrumbs li a {
+ul.map3-hierarchies li a {
   background: #ddd;
   padding: .7em 1em;
   float: left;
@@ -77,13 +73,13 @@ ul.map3-breadcrumbs li a {
   baseline-shift: -5%;
   height: auto;
 }
-ul.map3-breadcrumbs li a:hover {
+ul.map3-hierarchies li a:hover {
   color: #7a7a7a;
 }
-ul.map3-breadcrumbs li a:not(.disable):hover {
+ul.map3-hierarchies li a:not(.disable):hover {
   opacity: 0.7;
 }
-ul.map3-breadcrumbs li a::before {
+ul.map3-hierarchies li a::before {
   content: "";
   position: absolute;
   top: 50%;
@@ -93,10 +89,10 @@ ul.map3-breadcrumbs li a::before {
   border-color: #ddd #ddd #ddd transparent;
   left: -14px;
 }
-ul.map3-breadcrumbs li:last-child a::after {
+ul.map3-hierarchies li:last-child a::after {
   border-color: #ddd #ddd #ddd #ddd;
 }
-ul.map3-breadcrumbs li a::after {
+ul.map3-hierarchies li a::after {
   content: "";
   position: absolute;
   top: 50%;
@@ -106,46 +102,46 @@ ul.map3-breadcrumbs li a::after {
   border-left: 1em solid #ddd;
   right: -1em;
 }
-ul.map3-breadcrumbs .current,
-ul.map3-breadcrumbs .current:hover {
+ul.map3-hierarchies .current,
+ul.map3-hierarchies .current:hover {
   font-weight: bold;
   background: none;
 }
-ul.map3-breadcrumbs .current::after,
-ul.map3-breadcrumbs .current::before {
+ul.map3-hierarchies .current::after,
+ul.map3-hierarchies .current::before {
   content: normal;
 }
-ul.map3-breadcrumbs li a.disable {
+ul.map3-hierarchies li a.disable {
   cursor: not-allowed;
 }
-ul.map3-breadcrumbs li:first-child a {
+ul.map3-hierarchies li:first-child a {
   background-color: #ddd;
   color: #7a7a7a;
 }
-ul.map3-breadcrumbs li:first-child a::before {
+ul.map3-hierarchies li:first-child a::before {
   border-color: #ddd #ddd #ddd #ddd;
 }
 
 @media only screen and (min-width: 220px) and (max-width: 540px) {
-  .map3-breadcrumbs {
+  .map3-hierarchies {
     height: auto !important;
   }
 
-  .map3-breadcrumbs li,
-  .map3-breadcrumbs li a {
+  .map3-hierarchies li,
+  .map3-hierarchies li a {
     width: 95%;
   }
 
-  .map3-breadcrumbs li a {
+  .map3-hierarchies li a {
     margin-top: 1px;
   }
 
-  .map3-breadcrumbs li a::before {
+  .map3-hierarchies li a::before {
     border-color: #ddd #ddd #ddd #ddd;
     height: 40px;
   }
 
-  .map3-breadcrumbs li:last-child a::after {
+  .map3-hierarchies li:last-child a::after {
     border-color: transparent transparent transparent #ddd;
   }
 }
@@ -156,7 +152,7 @@ ul.map3-breadcrumbs li:first-child a::before {
   font-weight: bold;
 }
 
-.breadcrumb {
+.map3-breadcrumbs {
   margin-left: 0px;
   padding: 0px;
   margin-bottom: 0px;
@@ -165,25 +161,21 @@ ul.map3-breadcrumbs li:first-child a::before {
   color: #7a7a7a;
   height: 35px;
 }
-.breadcrumb .note {
+.map3-breadcrumbs .note {
   text-align: right;
   font-size: 12px;
   font-style: italic;
   font-weight: bold;
 }
 
-.breadcrumb > li {
+.map3-breadcrumbs > li {
   display: inline-block;
 }
 
-.breadcrumb > li + li:before {
+.map3-breadcrumbs > li + li:before {
   content: "/\00a0";
   padding: 0 5px;
   color: #7a7a7a;
-}
-
-.breadcrumb .icon {
-  background-image: url("data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/PjxzdmcgaGVpZ2h0PSI0OCIgdmlld0JveD0iMCAwIDQ4IDQ4IiB3aWR0aD0iNDgiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTM0IDZoLTIwYy0yLjIxIDAtMy45OCAxLjc5LTMuOTggNGwtLjAyIDMyIDE0LTYgMTQgNnYtMzJjMC0yLjIxLTEuNzktNC00LTR6Ii8+PHBhdGggZD0iTTAgMGg0OHY0OGgtNDh6IiBmaWxsPSJub25lIi8+PC9zdmc+");
 }
 
 /*# sourceMappingURL=map3.css.map */
