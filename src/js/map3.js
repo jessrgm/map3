@@ -13,6 +13,7 @@ var Map3 = function (options) {
     this.initialize(options);
     this.timeArray = [];
     this.dataMap = {};
+    this.dataMapTable = {};
     this.build();
     this.breadcrumbs();
 }
@@ -71,11 +72,11 @@ Map3.prototype.build = function () {
     /*
      * Bind the data formatter
      */
-    this.treemap.tooltip({
-        "html": function (e) {
-            return "";
-        }
-    });
+    /*    this.treemap.tooltip({
+            "html": function (e) {
+                return "";
+            }
+        });*/
 
     /*
      * Bind the data formatter
@@ -112,6 +113,8 @@ Map3.prototype.build = function () {
         this.time.solo = typeof this.time.solo == "undefined" ? [] : this.time.solo;
         this.treemap.time(this.time);
     }
+    //se mejoran los bordes para que sean realativos al tamaño del box
+    this.processBorders();
 }
 
 /**
@@ -135,14 +138,15 @@ Map3.prototype.trigger = function (event, data) {
  */
 Map3.prototype.beforeClick = function (d, viz) {
     if (this.level < this.levels.length - 1 && this.levels.length != 0) {
-        this.zoom(d);
-        this.updateBreadcrumbs(d);
-        this.dataMap[this.level] = d;
+        var data = this.getData(this.level, d);
+        data = $.extend({}, data, d);
+        this.zoom(data);
+        this.updateBreadcrumbs(data);
         this.level += 1;
         if (typeof this.time != "undefined") {
-            this.time.solo = d[this.time.value];
+            this.time.solo = data[this.time.value];
         }
-        this.trigger("drill-down", d);
+        this.trigger("drill-down", data);
     }
 }
 
@@ -183,9 +187,24 @@ Map3.prototype.redraw = function (data) {
  * This method set the data and draw the treemap.
  */
 Map3.prototype.data = function (data) {
+    this.processData(data);
     this.treemap.data(data);
     this.treemap.draw();
     var total = this.treemap.total();
+}
+
+Map3.prototype.processData = function (data) {
+    this.dataMapTable[this.level] = {};
+    this.dataMap[this.level] = data;
+    for (var i = 0; i < data.length; i++) {
+        var key = d3plus.string.strip(data[i][this.label]);
+        this.dataMapTable[this.level][key] = data[i];
+    }
+}
+
+Map3.prototype.getData = function (level, data) {
+    var key = d3plus.string.strip(data[this.label]);
+    return this.dataMapTable[level][key];
 }
 
 /**
@@ -387,7 +406,7 @@ Map3.prototype.zoom = function (data) {
  * buil a breadcrumbs
  */
 Map3.prototype.breadcrumbs = function () {
-    var $ul = $("<ul class='map3-breadcrumbs'/>");
+    var $ul = $("<ul class='map3-hierarchies'/>");
     var $liTmpl = $("<li / >");
     var $aTmpl = $("<a class='map3-levels disable'/>");
     for (var i = 0; i < this.levels.length; i++) {
@@ -402,7 +421,7 @@ Map3.prototype.breadcrumbs = function () {
         $ul.append($li);
     }
     // leyenda del breadcrumbs
-    var $ol = $("<ol class='breadcrumb' />");
+    var $ol = $("<ol class='map3-breadcrumbs' />");
     //se añade los elementos
     $(this.container).prepend($ol);
     $(this.container).prepend($ul);
@@ -415,6 +434,32 @@ Map3.prototype.breadcrumbs = function () {
     });
 }
 
+Map3.prototype.processBorders = function () {
+    var thiz = this;
+    setTimeout(function () {
+        //se elimina el zoom
+        $("#tmp-zoom-g").remove();
+        //se elimnan todos los text con font-size negativas.
+        $(".d3plus_rect text[font-size^=-]").each(function () {
+            $(this).attr("font-size", "0px");
+        });
+
+        $("rect:not(.no-border)").each(function () {
+            var w = $(this).attr("width");
+            var h = $(this).attr("height");
+            w = parseInt((w + "").replace("px"));
+            h = parseInt((h + "").replace("px"));
+            if (w <= 1 || h <= 1) {
+                $(this).attr("data-border", "0");
+            } else if (w <= 5 || h <= 5) {
+                $(this).attr("data-border", "1");
+            } else if (w <= 10 || h <= 10) {
+                $(this).attr("data-border", "2");
+            }
+        });
+    }, 500);
+}
+
 /**
  *
  */
@@ -422,8 +467,8 @@ Map3.prototype.onDrillUp = function ($li) {
     var $a = $li.find("a");
     var level = $a.attr("data-level");
     this.level = parseInt(level);
-    var $labels = $(this.container).find(".breadcrumb");
-    var $brumbs = $(this.container).find(".map3-breadcrumbs");
+    var $labels = $(this.container).find(".map3-breadcrumbs");
+    var $brumbs = $(this.container).find(".map3-hierarchies");
     var len = $brumbs.find("[data-level]").length;
     for (var i = level; i < len; i++) {
         $labels.find("[data-level='" + i + "']").remove();
@@ -432,13 +477,14 @@ Map3.prototype.onDrillUp = function ($li) {
         $aEl.addClass("disable");
         $("." + aId).remove();
     }
-    var d = level == 0 ? null : this.dataMap[this.level - 1];
-    var data = $.extend({}, d);
+    var d = this.dataMap[this.level];
+    var data = {};
+    data.childs = $.extend({}, d);
     data.level = level;
     if (typeof this.time != "undefined" && data.data != null) {
-        data.data[this.time.value] = this.time.solo;
+        data[this.time.value] = this.time.solo;
     }
-
+    this.redraw(d);
     this.trigger("drill-up", data);
 }
 
@@ -449,7 +495,7 @@ Map3.prototype.updateBreadcrumbs = function (data) {
     var $target = this.getEl(data);
     var fill = $target.find("rect").attr("fill");
     var textColor = d3plus.color.text(fill);
-    var $brumbs = $(this.container).find(".map3-breadcrumbs");
+    var $brumbs = $(this.container).find(".map3-hierarchies");
     var $a = $brumbs.find("[data-level='" + this.level + "']");
     var aId = $a.attr("id");
     $a.removeClass("disable");
@@ -461,10 +507,10 @@ Map3.prototype.updateBreadcrumbs = function (data) {
     aStyle += "a#{id}{background-color: {fill}; color:{text}}";
     aStyle += "li:first-child a#{id}::before{border-color: {fill} {fill} {fill} {fill};}";
     aStyle += "</style>";
-    aStyle = aStyle.replace(/{id}/g, aId).replace(/{fill}/g, fill).replace(/{color}/g, textColor);
+    aStyle = aStyle.replace(/{id}/g, aId).replace(/{fill}/g, fill).replace(/{text}/g, textColor);
     $a.append($(aStyle));
 
-    var $labels = $(this.container).find(".breadcrumb");
+    var $labels = $(this.container).find(".map3-breadcrumbs");
     var $li = $("<li/ >");
     $li.attr("data-level", this.level);
     var $span = $("<span class='text'/>");
