@@ -10,10 +10,14 @@
  * @config {number}[zoomTime] 
  */
 var Map3 = function (options) {
-    this.initialize(options);
+    this.locale = {
+        region: "en_US",
+        translate: {}
+    }
     this.timeArray = [];
     this.dataMap = {};
     this.dataMapTable = {};
+    this.initialize(options);
     this.build();
     this.breadcrumbs();
 }
@@ -26,6 +30,7 @@ var Map3 = function (options) {
  * @config {string} size the json attribute name that determines the size of the box.
  * @config {array}[levels] 
  * @config {number}[zoomTime]
+ * @config {String}[locale]
  */
 Map3.prototype.initialize = function (options) {
     this.zoomTime = 250;
@@ -78,15 +83,18 @@ Map3.prototype.build = function () {
             }
         });*/
 
+
     /*
      * Bind the data formatter
      */
     this.treemap.format({
-
+        locale: thiz.locale.region,
         text: function (text, params) {
             if (typeof params !== "undefined" && typeof params.data !== "undefined" && params.key == thiz.label) {
                 //se invoca al método que formatea los labels
                 return thiz.textFormat(params.data);
+            } else if (text && thiz.locale.translate) {
+                text = typeof thiz.locale.translate[text] !== "undefined" ? thiz.locale.translate[text] : text;
             }
             return d3plus.string.title(text, params);
         },

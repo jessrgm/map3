@@ -65,6 +65,28 @@ Type: `d3plus.time`
 
 Define the timeline of the treemap. [See d3plus](https://github.com/alexandersimoes/d3plus/wiki/Visualizations#time-false--string--function--object-)
 
+#### options[locale]
+Type: `Options`
+
+    * `{String}region`: [See d3plus location](https://github.com/alexandersimoes/d3plus/wiki/Localization).
+    * `{Object}translate`: the translation map.
+        
+Support specifying a locale to use for translating common interface words and phrases into a different language.
+
+
+```javascript
+    var viz = new Map3({
+        container: "#treemap",
+        ...
+        locale: {
+            region: "es_ES",
+            translate: {
+                "size": "Monto"
+            }
+        }
+    });
+```
+
 ## Functions
 The available functions to interact with the treemap:
 

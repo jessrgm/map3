@@ -7,6 +7,12 @@ $(function () {
         levels: ["Nivel", "Entidad"],
         time: {
             "value": "year"
+        },
+        locale: {
+            region: "es_ES",
+            translate: {
+                "size": "Monto total"
+            }
         }
     });
 
