@@ -35,7 +35,6 @@ var viz = new Map3({
 viz.data(vizData);
 ```
 
-
 ## Options
 The available configuration options from a treemap:
 
@@ -75,16 +74,16 @@ Support specifying a locale to use for translating common interface words and ph
 
 
 ```javascript
-    var viz = new Map3({
-        container: "#treemap",
-        ...
-        locale: {
-            region: "es_ES",
-            translate: {
-                "size": "Monto"
-            }
+var viz = new Map3({
+    container: "#treemap",
+    ...
+    locale: {
+        region: "es_ES",
+        translate: {
+            "size": "Monto"
         }
-    });
+    }
+});
 ```
 
 ## Functions
@@ -114,7 +113,7 @@ var viz = new Map3({
     size: "size"
 });
 
-//do someting
+//do something
 
 //setting data
 viz.data(vizData);
@@ -166,12 +165,12 @@ The events available are:
 var viz = new Map3({...});
 
 viz.on("drill-down", function (d) {
-    //do someting
+    //do something
     console.log(d);
 });
 
 viz.on("drill-up", function (d) {
-    //do someting
+    //do something
     console.log(d);
 });
 //setting data
