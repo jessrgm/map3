@@ -64,14 +64,14 @@ ul.map3-hierarchies li {
 }
 ul.map3-hierarchies li a {
   background: #ddd;
-  padding: .7em 1em;
+  padding: 10px 10px 0px 10px;
   float: left;
   text-decoration: none;
   color: #7a7a7a;
   position: relative;
   cursor: pointer;
   baseline-shift: -5%;
-  height: auto;
+  height: 30px;
 }
 ul.map3-hierarchies li a:hover {
   color: #7a7a7a;
@@ -176,6 +176,43 @@ ul.map3-hierarchies li:first-child a::before {
   content: "/\00a0";
   padding: 0 5px;
   color: #7a7a7a;
+}
+
+.timeline {
+  position: relative;
+  text-align: center;
+}
+.timeline:focus {
+  outline: none;
+}
+.timeline .entry {
+  padding: 5px;
+  border: solid 1px #c3c3c3;
+  border-right: solid 0px;
+  display: inline-block;
+  font-size: 12px;
+  text-align: center;
+  position: relative;
+  cursor: pointer;
+}
+.timeline .entry a {
+  color: #7a7a7a;
+}
+.timeline .entry a:hover {
+  text-decoration: none;
+}
+.timeline .entry.selected {
+  background: #c3c3c3;
+  border-color: #f1f1f1;
+}
+.timeline .entry:hover {
+  background: #f1f1f1;
+}
+.timeline .entry:last-child {
+  border-right: solid 1px #c3c3c3;
+}
+.timeline .entry:hover:last-child {
+  border-color: #f1f1f1;
 }
 
 /*# sourceMappingURL=map3.css.map */
