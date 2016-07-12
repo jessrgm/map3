@@ -639,16 +639,13 @@ Map3.prototype.groupingData = function (data) {
     var thiz = this;
     var sampleObj = null;
     var tmp = data.filter(function (d) {
-        console.log("group root", d[thiz.time])
         var show = true;
         if (typeof d[thiz.time] == "undefined") {
             return true;
         } else if (typeof d[thiz.time] == "number") {
-            console.log("group", thiz.timeSelection, d[thiz.time])
             show = thiz.timeSelection.indexOf(d[thiz.time]) >= 0;
         } else {
             for (var i = 0; i < d[thiz.time].length; i++) {
-                console.log("group array", thiz.timeSelection, d[thiz.time][i])
                 show = show && thiz.timeSelection.indexOf(d[thiz.time][i]) >= 0;
             }
         }
