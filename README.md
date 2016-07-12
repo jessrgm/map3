@@ -35,7 +35,6 @@ var viz = new Map3({
 viz.data(vizData);
 ```
 
-
 ## Options
 The available configuration options from a treemap:
 
@@ -68,23 +67,23 @@ Define the timeline of the treemap. [See d3plus](https://github.com/alexandersim
 #### options[locale]
 Type: `Options`
 
-    * `{String}region`: [See d3plus location](https://github.com/alexandersimoes/d3plus/wiki/Localization).
-    * `{Object}translate`: the translation map.
+* `{String}region`:  [See d3plus location](https://github.com/alexandersimoes/d3plus/wiki/Localization).
+* `{Object}translate`: the translation map.
         
 Support specifying a locale to use for translating common interface words and phrases into a different language.
 
 
 ```javascript
-    var viz = new Map3({
-        container: "#treemap",
-        ...
-        locale: {
-            region: "es_ES",
-            translate: {
-                "size": "Monto"
-            }
+var viz = new Map3({
+    container: "#treemap",
+    ...
+    locale: {
+        region: "es_ES",
+        translate: {
+            "size": "Monto"
         }
-    });
+    }
+});
 ```
 
 ## Functions
@@ -114,7 +113,7 @@ var viz = new Map3({
     size: "size"
 });
 
-//do someting
+//do something
 
 //setting data
 viz.data(vizData);
@@ -166,12 +165,12 @@ The events available are:
 var viz = new Map3({...});
 
 viz.on("drill-down", function (d) {
-    //do someting
+    //do something
     console.log(d);
 });
 
 viz.on("drill-up", function (d) {
-    //do someting
+    //do something
     console.log(d);
 });
 //setting data
