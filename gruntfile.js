@@ -55,6 +55,7 @@ module.exports = function (grunt) {
                 'src/vendors/jquery/dist/jquery.min.js',
                 'src/vendors/d3/d3.min.js',
                 'src/vendors/d3plus/d3plus.min.js',
+                'src/js/d3.selectable.js',
                 'src/js/map3.js'
                 ],
                 dest: 'dist/js/map3.full.js'

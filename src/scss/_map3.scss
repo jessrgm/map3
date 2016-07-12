@@ -1,6 +1,8 @@
 $gray_color:#ddd;
-//$text_color:#959595;
 $text_color:#7a7a7a;
+$time_active: #c3c3c3;
+$time_border: #c3c3c3;
+$time_hover:#f1f1f1;
 .map3 {
     margin-top: 25px;
     margin-bottom: 25px;
@@ -66,14 +68,14 @@ ul.map3-hierarchies {
         margin: 0 .5em 0 1em;
         a {
             background: $gray_color;
-            padding: .7em 1em;
+            padding: 10px 10px 0px 10px;
             float: left;
             text-decoration: none;
             color: $text_color;
             position: relative;
             cursor: pointer;
             baseline-shift: -5%;
-            height: auto;
+            height: 30px;
         }
         a:hover {
             color: $text_color;
@@ -173,4 +175,40 @@ ul.map3-hierarchies {
     content: "/\00a0";
     padding: 0 5px;
     color: $text_color;
+}
+.timeline {
+    position: relative;
+    text-align: center;
+    &:focus {
+        outline: none
+    }
+    .entry {
+        padding: 5px;
+        border: solid 1px $time_border;
+        border-right: solid 0px;
+        display: inline-block;
+        font-size: 12px;
+        text-align: center;
+        position: relative;
+        cursor: pointer;
+        a {
+            color: $text_color;
+            &:hover {
+                text-decoration: none;
+            }
+        }
+        &.selected {
+            background: $time_active;
+            border-color: $time_hover;
+        }
+        &:hover {
+            background: $time_hover;
+        }
+        &:last-child {
+            border-right: solid 1px $time_border;
+        }
+        &:hover:last-child {
+            border-color: $time_hover;
+        }
+    }
 }

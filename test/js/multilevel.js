@@ -5,9 +5,7 @@ $(function () {
         label: "value",
         size: "size",
         levels: ["Nivel", "Entidad"],
-        time: {
-            "value": "year"
-        },
+        time: "year",
         locale: {
             region: "es_ES",
             translate: {

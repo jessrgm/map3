@@ -11,10 +11,9 @@
         "tests"
       ],
     "dependencies": {
-        "jquery": "*",
-        "d3": "*",
+        "jquery": "2.2.4",
+        "d3": "3.5.*",
         "d3plus": "1.9.3",
-        "jquery.svg": "*",
         "bootstrap-sass": "*"
     }
 }

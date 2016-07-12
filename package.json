@@ -1,6 +1,6 @@
 {
     "name": "3map",
-    "version": "0.0.1",
+    "version": "v0.0.1",
     "authors": ["Maximiliano Báez González <mxbg.py@gmail.com>"],
     "description": "Javascript library to implement a interactive zoomable treemap.",
     "private": true,

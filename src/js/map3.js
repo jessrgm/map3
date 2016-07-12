@@ -15,6 +15,7 @@ var Map3 = function (options) {
         translate: {}
     }
     this.timeArray = [];
+    this.timeSelection = [];
     this.dataMap = {};
     this.dataMapTable = {};
     this.initialize(options);
@@ -43,12 +44,30 @@ Map3.prototype.initialize = function (options) {
     this.label = typeof this.label == "string" ? [this.label] : this.label;
     this.levels = typeof this.levels == "undefined" ? [] : this.levels;
     //se prepara el container de la visualización
-    this.scope = "map3-" + (new Date()).getTime();
-    var $container = $("<div></div>");
-    $container.attr("id", this.scope);
-    this.scope = "#" + this.scope;
-    $(this.container).append($container);
-    //se inicializa el view
+    this.prepareContainer();
+}
+
+Map3.prototype.prepareContainer = function () {
+    var scope = this.container.replace("#", "");
+    this.vizId = scope + "-viz";
+    this.footerId = scope + "-footer";
+    this.headerId = scope + "-header";
+    this.scope = "#" + this.vizId;
+    var $header = $("<div />");
+    $header.attr("id", this.headerId);
+
+    var $viz = $("<div />");
+    $viz.attr("id", this.vizId);
+
+    var $footer = $("<div />");
+    $footer.attr("id", this.footerId);
+
+    $(this.config.container).addClass("map3-chart");
+    $viz.addClass("map3-viz");
+
+    $(this.container).append($header);
+    $(this.container).append($viz);
+    $(this.container).append($footer);
 }
 
 /**
@@ -77,16 +96,6 @@ Map3.prototype.build = function () {
     /*
      * Bind the data formatter
      */
-    /*    this.treemap.tooltip({
-            "html": function (e) {
-                return "";
-            }
-        });*/
-
-
-    /*
-     * Bind the data formatter
-     */
     this.treemap.format({
         locale: thiz.locale.region,
         text: function (text, params) {
@@ -104,7 +113,6 @@ Map3.prototype.build = function () {
             }
             return d3plus.number.format(number, params);
         }
-
     });
 
     /*
@@ -116,11 +124,6 @@ Map3.prototype.build = function () {
             thiz.beforeClick(d, viz);
         }
     });
-
-    if (typeof thiz.time !== "undefined") {
-        this.time.solo = typeof this.time.solo == "undefined" ? [] : this.time.solo;
-        this.treemap.time(this.time);
-    }
     //se mejoran los bordes para que sean realativos al tamaño del box
     this.processBorders();
 }
@@ -195,10 +198,15 @@ Map3.prototype.redraw = function (data) {
  * This method set the data and draw the treemap.
  */
 Map3.prototype.data = function (data) {
+
     this.processData(data);
-    this.treemap.data(data);
+    var d = this.groupingData(data);
+    this.treemap.data(d);
     this.treemap.draw();
     var total = this.treemap.total();
+    if (typeof this.time !== "undefined" && this.timeSelection.length == 0) {
+        this.timeline();
+    }
 }
 
 Map3.prototype.processData = function (data) {
@@ -409,7 +417,6 @@ Map3.prototype.zoom = function (data) {
     $("#d3plus_viz").append($target);
 }
 
-
 /**
  * buil a breadcrumbs
  */
@@ -530,4 +537,145 @@ Map3.prototype.updateBreadcrumbs = function (data) {
     //$li.append($("<br/>"));
     //$li.append($div);
     $labels.append($li);
+}
+
+
+/**
+ * Build a timeline for the visualization
+ */
+Map3.prototype.timeline = function () {
+    // create lists
+    $("#" + this.footerId).html("");
+    var ul = d3.select("#" + this.footerId)
+        .append('ul')
+        .attr("class", "timeline")
+        .attr('tabindex', 1);
+
+    var thiz = this;
+    var time = this.timeArray.sort().map(function (d) {
+        var data = {
+            "time": d
+        };
+
+        if (thiz.timeSelection.length == 0 || thiz.timeSelection.indexOf(d) >= 0) {
+            data["_selected"] = true;
+        }
+        return data;
+    });
+    var li = ul.selectAll('li')
+        .data(time)
+        .enter()
+        .append('li')
+        .attr("class", "entry")
+        .classed('selected', function (d) {
+            return d._selected;
+        })
+        .append('a')
+        .text(function (d) {
+            return d.time;
+        });
+
+    d3.selectable(ul, li, function (e) {
+        var selections = []
+        ul.selectAll('li')
+            .classed('selected', function (d) {
+                if (d._selected) {
+                    selections.push(d);
+                }
+                return d._selected;
+            })
+
+        //se establecen la selecciones
+        thiz.timeSelection = selections.map(function (d) {
+            return d.time;
+        });
+
+        thiz.onChange();
+        thiz.trigger("timechange", thiz.timeSelection);
+    });
+}
+
+
+/**
+ * Prepare the data for the vizualization
+ */
+Map3.prototype.roolup = function (v, sample) {
+    var data = {};
+    var thiz = this;
+    for (var attr in sample) {
+        if (attr == this.time) {
+            data[attr] = v.map(function (d) {
+                if (thiz.timeArray.indexOf(d[attr]) == -1) {
+                    thiz.timeArray.push(d[attr]);
+                }
+                return d[attr];
+            });
+        } else if (attr == this.label) {
+            data[attr] = v[0][attr];
+        } else if (typeof sample[attr] == "number") {
+            data[attr] = d3.sum(v, function (d) {
+                return d[attr];
+            });
+        } else if (attr == "children") {
+            data[attr] = data[attr] ? data[attr] : [];
+            for (var i = 0; i < v.length; i++) {
+                for (var j = 0; j < v[i][attr].length; j++) {
+                    data[attr].push(v[i][attr][j]);
+                }
+            }
+        } else {
+            data[attr] = v.map(function (d) {
+                return d[attr];
+            });
+        }
+    }
+    return data;
+}
+
+/**
+ * Groupping the array for the visualization
+ */
+Map3.prototype.groupingData = function (data) {
+    var thiz = this;
+    var sampleObj = null;
+    var tmp = data.filter(function (d) {
+        console.log("group root", d[thiz.time])
+        var show = true;
+        if (typeof d[thiz.time] == "undefined") {
+            return true;
+        } else if (typeof d[thiz.time] == "number") {
+            console.log("group", thiz.timeSelection, d[thiz.time])
+            show = thiz.timeSelection.indexOf(d[thiz.time]) >= 0;
+        } else {
+            for (var i = 0; i < d[thiz.time].length; i++) {
+                console.log("group array", thiz.timeSelection, d[thiz.time][i])
+                show = show && thiz.timeSelection.indexOf(d[thiz.time][i]) >= 0;
+            }
+        }
+        return thiz.timeSelection.length == 0 || show;
+    });
+
+    var filters = d3.nest()
+        .key(function (d) {
+            sampleObj = d;
+            return d[thiz.label];
+        })
+        .rollup(function (v) {
+            return thiz.roolup(v, sampleObj);
+        }).entries(tmp);
+
+    var dataA = filters.map(function (d) {
+        return d.values;
+    });
+    return dataA;
+}
+
+
+/**
+ * Tieline change handler
+ */
+Map3.prototype.onChange = function () {
+    var data = $.extend([], this.dataMap[this.level], true);
+    this.redraw(data);
+
 }
