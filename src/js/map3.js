@@ -8,6 +8,7 @@
  * @config {string}[time] the json attribute name that determines the timeline of the view.
  * @config {array}[levels] 
  * @config {number}[zoomTime] 
+ * @config {string}[timeContainer] default footer
  */
 var Map3 = function (options) {
     this.locale = {
@@ -18,6 +19,7 @@ var Map3 = function (options) {
     this.timeSelection = [];
     this.dataMap = {};
     this.dataMapTable = {};
+    this.timeContainer = "footer";
     this.initialize(options);
     this.build();
     this.breadcrumbs();
@@ -544,9 +546,17 @@ Map3.prototype.updateBreadcrumbs = function (data) {
  * Build a timeline for the visualization
  */
 Map3.prototype.timeline = function () {
-    // create lists
-    $("#" + this.footerId).html("");
-    var ul = d3.select("#" + this.footerId)
+    // create list
+
+    var containersMap = {
+        "header": this.headerId,
+        "footer": this.footerId
+    }
+    var timeId = typeof containersMap[this.timeContainer] == "undefined" ? this.timeContainer : containersMap[this.timeContainer];
+    timeId = "#" + timeId;
+    $(timeId).html("");
+
+    var ul = d3.select(timeId)
         .append('ul')
         .attr("class", "timeline")
         .attr('tabindex', 1);

@@ -5,10 +5,8 @@ $(function () {
         label: "value",
         size: "size",
         levels: ["Entidad", "Descripción"],
-        time: {
-            "value": "year",
-            "solo": [2011]
-        }
+        time: "year",
+        timeContainer: "header",
     });
 
     viz.config({
