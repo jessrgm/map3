@@ -547,7 +547,6 @@ Map3.prototype.updateBreadcrumbs = function (data) {
  */
 Map3.prototype.timeline = function () {
     // create list
-
     var containersMap = {
         "header": this.headerId,
         "footer": this.footerId
@@ -555,6 +554,12 @@ Map3.prototype.timeline = function () {
     var timeId = typeof containersMap[this.timeContainer] == "undefined" ? this.timeContainer : containersMap[this.timeContainer];
     timeId = "#" + timeId;
     $(timeId).html("");
+
+    if (this.timeSelection.length == 0) {
+        this.timeSelection = this.timeArray.sort().map(function (d) {
+            return d
+        });
+    }
 
     var ul = d3.select(timeId)
         .append('ul')
@@ -572,6 +577,7 @@ Map3.prototype.timeline = function () {
         }
         return data;
     });
+
     var li = ul.selectAll('li')
         .data(time)
         .enter()
@@ -586,7 +592,7 @@ Map3.prototype.timeline = function () {
         });
 
     d3.selectable(ul, li, function (e) {
-        var selections = []
+        var selections = [];
         ul.selectAll('li')
             .classed('selected', function (d) {
                 if (d._selected) {
@@ -594,6 +600,12 @@ Map3.prototype.timeline = function () {
                 }
                 return d._selected;
             })
+
+        if (thiz.timeSelection.length == 1 && selections.length == 1) {
+            if (thiz.timeSelection.indexOf(selections[0].time) >= 0) {
+                return;
+            }
+        }
 
         //se establecen la selecciones
         thiz.timeSelection = selections.map(function (d) {
