@@ -1,13 +1,13 @@
 /**
  * Interactive treemap based on d3plus treemap.
- 
- * @param {Object} options 
+
+ * @param {Object} options
  * @config {string} container target container.
  * @config {string|array} label the json attribute name that determines the label of the box.
  * @config {string} size the json attribute name that determines the size of the box.
  * @config {string}[time] the json attribute name that determines the timeline of the view.
- * @config {array}[levels] 
- * @config {number}[zoomTime] 
+ * @config {array}[levels]
+ * @config {number}[zoomTime]
  * @config {string}[timeContainer] default footer
  */
 var Map3 = function (options) {
@@ -15,6 +15,8 @@ var Map3 = function (options) {
         region: "en_US",
         translate: {}
     }
+    this.totales = {};
+    this.first = true;
     this.timeArray = [];
     this.timeSelection = [];
     this.dataMap = {};
@@ -27,11 +29,11 @@ var Map3 = function (options) {
 
 /**
  * Constructor of class.
- * @param {Object} options 
+ * @param {Object} options
  * @config {string} container target container.
  * @config {string|array} label the json attribute name that determines the label of the box.
  * @config {string} size the json attribute name that determines the size of the box.
- * @config {array}[levels] 
+ * @config {array}[levels]
  * @config {number}[zoomTime]
  * @config {String}[locale]
  */
@@ -200,16 +202,20 @@ Map3.prototype.redraw = function (data) {
  * This method set the data and draw the treemap.
  */
 Map3.prototype.data = function (data) {
-
     this.processData(data);
     var d = this.groupingData(data);
+    if (this.first) {
+        this.buildTotales(this.level, data);
+    }
     this.treemap.data(d);
     this.treemap.draw();
     var total = this.treemap.total();
     if (typeof this.time !== "undefined" && this.timeSelection.length == 0) {
         this.timeline();
     }
+    this.calcularTotal();
 }
+
 
 Map3.prototype.processData = function (data) {
     this.dataMapTable[this.level] = {};
@@ -316,7 +322,7 @@ Map3.prototype.getEl = function (data) {
  */
 Map3.prototype.zoom = function (data) {
     // se obtiene la referencia al elemento seleccionado. D3plus utiliza transform para transladar
-    // las coordenadas del svg, se busca por el elemento que coincida con el translate del g 
+    // las coordenadas del svg, se busca por el elemento que coincida con el translate del g
     var $g = this.getEl(data);
     //se obtiene el tamaño del contenedor para calcular el tamaño de la tipografía.
     var w = $(this.scope).css("width").replace("px", "");
@@ -379,7 +385,7 @@ Map3.prototype.zoom = function (data) {
     //para evitar que la tipografía sea muy grande, se pone un límite de 50px
     tmpSize = tmpSize > 50 ? 50 : tmpSize;
     var fontSize = tmpSize + "px";
-    //si el texto cuenta con más de 5 líneas se modifica su posición incial para que no haga 
+    //si el texto cuenta con más de 5 líneas se modifica su posición incial para que no haga
     //overflow el texto.
     var textPosition = lineCount <= 5 ? "100px" : "10px";
 
@@ -423,6 +429,9 @@ Map3.prototype.zoom = function (data) {
  * buil a breadcrumbs
  */
 Map3.prototype.breadcrumbs = function () {
+    var $top = $("<div class='top-note'></div>");
+    $top.append($("<span class='text'>Total: </span>"));
+    $top.append($("<span class='note' id='map3-total-0'></span>"));
     var $ul = $("<ul class='map3-hierarchies'/>");
     var $liTmpl = $("<li / >");
     var $aTmpl = $("<a class='map3-levels disable'/>");
@@ -442,6 +451,7 @@ Map3.prototype.breadcrumbs = function () {
     //se añade los elementos
     $(this.container).prepend($ol);
     $(this.container).prepend($ul);
+    $(this.container).prepend($top);
 
     var thiz = this;
     $ul.find("li").on("click", function () {
@@ -528,19 +538,19 @@ Map3.prototype.updateBreadcrumbs = function (data) {
     $a.append($(aStyle));
 
     var $labels = $(this.container).find(".map3-breadcrumbs");
-    var $li = $("<li/ >");
+    var $li = $("<li/>");
     $li.attr("data-level", this.level);
     var $span = $("<span class='text'/>");
     var $div = $("<div class='note'/>");
+    $div.attr("id", "map3-total-" + (this.level + 1));
     $span.text(this.textFormat(data));
     $div.text(this.sizeFormat(data));
     $li.append($span);
     //TODO se desabilita los totales ya que falta implementar el filtrado por año.
-    //$li.append($("<br/>"));
-    //$li.append($div);
+    $li.append($("<br/>"));
+    $li.append($div);
     $labels.append($li);
 }
-
 
 /**
  * Build a timeline for the visualization
@@ -617,7 +627,6 @@ Map3.prototype.timeline = function () {
     });
 }
 
-
 /**
  * Prepare the data for the vizualization
  */
@@ -686,7 +695,75 @@ Map3.prototype.groupingData = function (data) {
     var dataA = filters.map(function (d) {
         return d.values;
     });
+
     return dataA;
+}
+
+/**
+ *
+ * Este metodo se encarga de calcular la suma de todos los tamaños del treemap
+ * @function
+ *
+ */
+Map3.prototype.calcularTotal = function () {
+    var anhos = this.timeSelection; //typeof this.timeSelection == "undefined" ? ["NaN"] : this.timeSelection;
+    anhos = anhos.length == 0 ? ["NaN"] : anhos;
+    var thiz = this;
+
+    function sum(jerarquia, anho) {
+        var val = 0;
+        //se verifica si existen datos para la jeraquía, tipo de moneda y el año
+        //actual
+        if (typeof thiz.totales[jerarquia] == "undefined" ||
+            typeof thiz.totales[jerarquia][anho] == "undefined") {
+            val = 0;
+        } else {
+            val = thiz.totales[jerarquia][anho];
+        }
+        return val;
+    }
+
+    for (var jerarquia in this.totales) {
+        var tmp = 0;
+        for (var i = 0; i < anhos.length; i++) {
+            tmp += sum(jerarquia, anhos[i]);
+        }
+        var d = {};
+        d[this.size]=tmp;
+        $("#map3-total-" + jerarquia).text(this.sizeFormat(d));
+    }
+}
+
+/**
+ * Se encarga de construir el Json que tiene la inforación de los totales por año,
+ * tipo de moneda y jerarquia. Donde el Json tiene la siguiente estructura.
+ * <code>
+ * {
+ *   "0":{
+ *       "2012":34132428986,
+ *       "2013":18821743400,
+ *       "2014":23010078400
+ *   },
+ *   "1":{
+ *       "2012":5533832700,
+ *       "2013":1541915000,
+ *       "2014":2811060000
+ *   }
+ * }
+ * </code>
+ */
+Map3.prototype.buildTotales = function (jerarquia, data) {
+    this.totales[jerarquia] = {};
+    for (var i = 0; i < data.length; i++) {
+        var model = data[i];
+        if (typeof jerarquia !== "undefined") {
+            var tmpYear = model[this.time] ? model[this.time] : "NaN";
+            if (typeof this.totales[jerarquia][tmpYear] == "undefined") {
+                this.totales[jerarquia][tmpYear] = 0;
+            }
+            this.totales[jerarquia][tmpYear] += model[this.size];
+        }
+    }
 }
 
 
